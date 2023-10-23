@@ -1,15 +1,15 @@
-FROM python:3.10
+FROM python:3.8
 
 RUN apt update
 
 WORKDIR /sprint-4
 
-COPY requirements.txt requirements.txt
+COPY req.txt req.txt
 
 RUN  pip install --upgrade pip \
-     && pip install -r requirements.txt --no-cache-dir
+     && pip install -r req.txt --no-cache-dir
 
 COPY . .
 
 # Укажите, как запускать ваш сервис
-RUN ["python3", "src/main.py"]
+CMD ["python3", "src/main.py"]
