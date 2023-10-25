@@ -3,8 +3,7 @@ from fastapi import Depends
 from typing import Optional, List
 from functools import lru_cache
 
-from models.films import DetailedFilm, BaseFilm, ListBaseFilm
-from core.config import app_settings
+from models.films import DetailedFilm, BaseFilm
 from repositories.films import AbstractDbFilmRepository, AbstractCacheFilmRepository
 from repositories.films.redis import get_films_redis_repo
 from repositories.films.elastic import get_films_elastic_repo
