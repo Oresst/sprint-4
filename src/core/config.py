@@ -17,6 +17,8 @@ class AppSettings(BaseSettings):
     elastic_host: str = Field(default="127.0.0.1", validation_alias="ELASTIC_HOST")
     elastic_port: int = Field(default=9200, validation_alias="ELASTIC_PORT")
 
+    film_cache_expire: int = Field(default=60 * 5)
+
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
