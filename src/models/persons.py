@@ -7,14 +7,21 @@ class Person(BaseModel):
     name: str = Field(serialization_alias="full_name")
 
 
+class BasePerson(BaseModel):
+    id: str = Field(serialization_alias="uuid")
+    full_name: str
+
+
 class PersonFilms(BaseModel):
     id: str = Field(serialization_alias="uuid")
+    imdb_rating: float
+    title: str
     roles: List[str]
 
 
-class DetailedPerson(Person):
+class DetailedPerson(BasePerson):
     films: List[PersonFilms]
 
 
 class ListPerson(BaseModel):
-    films: List[Person]
+    persons: List[DetailedPerson]

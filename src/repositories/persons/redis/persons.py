@@ -23,10 +23,10 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
         await self._redis.set(person.id, person.model_dump_json(), app_settings.person_cache_expire)
 
     async def get_persons(
-            self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
+            self, sort: Optional[str], query: Optional[str], page_number: int, page_size: int
     ) -> Optional[ListPerson]:
 
-        key = self._generate_key("persons", sort, query, genre, page_number, page_size)
+        key = self._generate_key("persons", sort, query, page_number, page_size)
         data = await self._redis.get(key)
 
         if not data:
@@ -39,14 +39,13 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
             self,
             sort: Optional[str],
             query: Optional[str],
-            genre: Optional[str],
             page_number: int,
             page_size: int,
             persons: List[Person],
     ) -> None:
 
         persons = ListPerson(persons=persons)
-        key = self._generate_key("persons", sort, query, genre, page_number, page_size)
+        key = self._generate_key("persons", sort, query, page_number, page_size)
 
         await self._redis.set(key, persons.model_dump_json(), app_settings.person_cache_expire)
 

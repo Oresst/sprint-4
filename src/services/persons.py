@@ -28,24 +28,24 @@ class PersonsService:
         return person
 
     async def get_persons(
-        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
-    ) -> List[Person]:
-        persons = await self._cache.get_persons(sort, query, genre, page_number, page_size)
+            self, sort: Optional[str], query: Optional[str], page_number: int, page_size: int
+    ) -> List[DetailedPerson]:
+        persons = await self._cache.get_persons(sort, query, page_number, page_size)
 
         if persons is not None:
             return persons.persons
 
-        persons = await self._db.get_persons(sort, query, genre, page_number, page_size)
+        persons = await self._db.get_persons(sort, query, page_number, page_size)
 
         if persons is not None:
-            await self._cache.save_persons(sort, query, genre, page_number, page_size, persons)
+            await self._cache.save_persons(sort, query, page_number, page_size, persons)
 
         return persons
 
 
 @lru_cache()
 def get_persons_service(
-    redis_repo: AbstractCachePersonRepository = Depends(get_persons_redis_repo),
-    es_repo: AbstractDbPersonRepository = Depends(get_persons_elastic_repo),
+        redis_repo: AbstractCachePersonRepository = Depends(get_persons_redis_repo),
+        es_repo: AbstractDbPersonRepository = Depends(get_persons_elastic_repo),
 ) -> PersonsService:
     return PersonsService(redis_repo, es_repo)

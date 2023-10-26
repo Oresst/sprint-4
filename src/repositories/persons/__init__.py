@@ -11,8 +11,8 @@ class AbstractDbPersonRepository(ABC):
 
     @abstractmethod
     async def get_persons(
-            self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
-    ) -> Optional[List[Person]]:
+            self, sort: Optional[str], query: Optional[str], page_size: int, page_number: int
+    ) -> Optional[List[DetailedPerson]]:
         raise NotImplementedError
 
 
@@ -27,7 +27,7 @@ class AbstractCachePersonRepository(ABC):
 
     @abstractmethod
     async def get_persons(
-            self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
+            self, sort: Optional[str], query: Optional[str], page_number: int, page_size: int
     ) -> Optional[ListPerson]:
         raise NotImplementedError
 
@@ -36,9 +36,8 @@ class AbstractCachePersonRepository(ABC):
             self,
             sort: Optional[str],
             query: Optional[str],
-            genre: Optional[str],
             page_number: int,
             page_size: int,
-            persons: List[Person],
+            persons: List[DetailedPerson],
     ) -> None:
         raise NotImplementedError

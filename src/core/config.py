@@ -4,7 +4,7 @@ from pydantic import Field
 import os
 from logging import config as logging_config
 
-from logger import LOGGING
+from .logger import LOGGING
 
 # Применяем настройки логирования
 logging_config.dictConfig(LOGGING)
@@ -18,6 +18,7 @@ class AppSettings(BaseSettings):
     elastic_port: int = Field(default=9200, validation_alias="ELASTIC_PORT")
 
     film_cache_expire: int = Field(default=60 * 5)
+    person_cache_expire: int = Field(default=60 * 5)
 
     class Config:
         env_file = ".env"
