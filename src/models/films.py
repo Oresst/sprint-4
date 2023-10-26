@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from typing import List, Optional
 
-from models.person import Person
+from models.persons import Person
 
 
 class BaseFilm(BaseModel):
