@@ -28,17 +28,17 @@ class FilmsService:
         return film
 
     async def get_films(
-        self, sort: Optional[str], query: Optional[str], page_number: int, page_size: int
+        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
     ) -> List[BaseFilm]:
-        films = await self._cache.get_films(page_number, page_size)
+        films = await self._cache.get_films(sort, query, genre, page_number, page_size)
 
         if films is not None:
             return films.films
 
-        films = await self._db.get_films(sort, query, page_number, page_size)
+        films = await self._db.get_films(sort, query, genre, page_number, page_size)
 
         if films is not None:
-            await self._cache.save_films(page_number, page_size, films)
+            await self._cache.save_films(sort, query, genre, page_number, page_size, films)
 
         return films
 

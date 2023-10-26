@@ -19,20 +19,23 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
         return DetailedFilm(**doc["_source"])
 
     async def get_films(
-        self, sort: Optional[str], query: Optional[str], page_size: int, page_number: int
+        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
     ) -> Optional[List[BaseFilm]]:
         sort_dict = {}
-        query_dict = {}
+        query_dict = {"bool": {"filter": []}}
 
         if sort is not None:
             sort_dict[sort.replace("-", "")] = "desc" if sort.find("-") else "asc"
 
         if query is not None:
-            query_dict = {"match": {"title": {"query": query}}}
+            query_dict["bool"]["filter"].append({"match": {"title": {"query": query}}})
+
+        if genre is not None:
+            query_dict["bool"]["filter"].append({"term": {"genre": {"value": genre, "case_insensitive": True}}})
 
         try:
             doc = await self._elastic.search(
-                index="movies", query=query_dict, from_=page_number - 1, size=page_size, sort=sort_dict
+                index="movies", query=query_dict, from_=(page_number - 1) * page_size, size=page_size, sort=sort_dict
             )
         except NotFoundError:
             return None

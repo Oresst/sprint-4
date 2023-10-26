@@ -11,7 +11,7 @@ class AbstractDbFilmRepository(ABC):
 
     @abstractmethod
     async def get_films(
-        self, sort: Optional[str], query: Optional[str], page_size: int, page_number: int
+        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
     ) -> Optional[List[BaseFilm]]:
         raise NotImplementedError
 
@@ -26,9 +26,19 @@ class AbstractCacheFilmRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_films(self, page_number: int, page_size: int) -> Optional[ListBaseFilm]:
+    async def get_films(
+        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
+    ) -> Optional[ListBaseFilm]:
         raise NotImplementedError
 
     @abstractmethod
-    async def save_films(self, page_number: int, page_size: int, films: List[BaseFilm]) -> None:
+    async def save_films(
+        self,
+        sort: Optional[str],
+        query: Optional[str],
+        genre: Optional[str],
+        page_number: int,
+        page_size: int,
+        films: List[BaseFilm],
+    ) -> None:
         raise NotImplementedError

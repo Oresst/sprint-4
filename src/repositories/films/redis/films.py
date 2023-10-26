@@ -22,8 +22,12 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
     async def save_film_by_id(self, film: DetailedFilm) -> None:
         await self._redis.set(film.id, film.model_dump_json(), app_settings.film_cache_expire)
 
-    async def get_films(self, page_number: int, page_size: int) -> Optional[ListBaseFilm]:
-        data = await self._redis.get(f"films-{page_number}-{page_size}")
+    async def get_films(
+        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
+    ) -> Optional[ListBaseFilm]:
+
+        key = self._generate_key("films", sort, query, genre, page_number, page_size)
+        data = await self._redis.get(key)
 
         if not data:
             return None
@@ -31,8 +35,27 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         films = ListBaseFilm.model_validate_json(data)
         return films
 
-    async def save_films(self, page_number: int, page_size: int, films: List[BaseFilm]) -> None:
+    async def save_films(
+        self,
+        sort: Optional[str],
+        query: Optional[str],
+        genre: Optional[str],
+        page_number: int,
+        page_size: int,
+        films: List[BaseFilm],
+    ) -> None:
+
         films = ListBaseFilm(films=films)
-        await self._redis.set(
-            f"films-{page_number}-{page_size}", films.model_dump_json(), app_settings.film_cache_expire
-        )
+        key = self._generate_key("films", sort, query, genre, page_number, page_size)
+
+        await self._redis.set(key, films.model_dump_json(), app_settings.film_cache_expire)
+
+    @staticmethod
+    def _generate_key(name: str, *args) -> str:
+        key = [name]
+
+        for item in args:
+            if item is not None:
+                key.append(str(item))
+
+        return "-".join(key)

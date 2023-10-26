@@ -18,9 +18,10 @@ async def film_details(film_id: str, films_service: FilmsService = Depends(get_f
 async def film_details(
     sort: Optional[str] = None,
     query: Optional[str] = None,
+    genre: Optional[str] = None,
     page_size: int = 10,
     page_number: int = 1,
     films_service: FilmsService = Depends(get_films_service),
 ) -> List[BaseFilm]:
-    film = await films_service.get_films(sort, query, page_size, page_number)
+    film = await films_service.get_films(sort, query, genre, page_size, page_number)
     return film
