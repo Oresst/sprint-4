@@ -35,7 +35,7 @@ class GenresService:
 
         genres = await self._db.get_genres()
 
-        if genres is not None:
+        if genres:
             await self._cache.save_genres(genres)
 
         return genres
