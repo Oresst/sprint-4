@@ -7,6 +7,8 @@ from models.films import DetailedFilm, ListBaseFilm, BaseFilm
 
 
 class FilmsRedisRepository(AbstractCacheFilmRepository):
+    tag = "films"
+
     def __init__(self, redis: Redis):
         self._redis = redis
 
@@ -20,13 +22,13 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         return film
 
     async def save_film_by_id(self, film: DetailedFilm) -> None:
-        await self._redis.set(film.id, film.model_dump_json(), app_settings.film_cache_expire)
+        await self._redis.set(film.id, film.model_dump_json(), app_settings.cache_expire)
 
     async def get_films(
         self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
     ) -> Optional[ListBaseFilm]:
 
-        key = self._generate_key("films", sort, query, genre, page_number, page_size)
+        key = self._generate_key(sort, query, genre, page_number, page_size)
         data = await self._redis.get(key)
 
         if not data:
@@ -46,13 +48,12 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
     ) -> None:
 
         films = ListBaseFilm(films=films)
-        key = self._generate_key("films", sort, query, genre, page_number, page_size)
+        key = self._generate_key(sort, query, genre, page_number, page_size)
 
-        await self._redis.set(key, films.model_dump_json(), app_settings.film_cache_expire)
+        await self._redis.set(key, films.model_dump_json(), app_settings.cache_expire)
 
-    @staticmethod
-    def _generate_key(name: str, *args) -> str:
-        key = [name]
+    def _generate_key(self, *args) -> str:
+        key = [self.tag]
 
         for item in args:
             if item is not None:

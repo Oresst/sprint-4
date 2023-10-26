@@ -15,7 +15,7 @@ async def film_details(film_id: str, films_service: FilmsService = Depends(get_f
 
 
 @router.get("/", response_model=List[BaseFilm])
-async def film_details(
+async def films_list(
     sort: Optional[str] = None,
     query: Optional[str] = None,
     genre: Optional[str] = None,

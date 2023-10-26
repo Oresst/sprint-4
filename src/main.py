@@ -7,6 +7,7 @@ from fastapi.responses import ORJSONResponse
 from redis.asyncio import Redis
 
 from api.v1 import films
+from api.v1 import genres
 from core.config import app_settings
 from core.logger import LOGGING
 from db import elastic
@@ -20,25 +21,20 @@ app = FastAPI(
 )
 
 
-@app.on_event('startup')
+@app.on_event("startup")
 async def startup():
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
-    elastic.es = AsyncElasticsearch(hosts=[f'http://{app_settings.elastic_host}:{app_settings.elastic_port}'])
+    elastic.es = AsyncElasticsearch(hosts=[f"http://{app_settings.elastic_host}:{app_settings.elastic_port}"])
 
 
-@app.on_event('shutdown')
+@app.on_event("shutdown")
 async def shutdown():
     await redis.redis.close()
     await elastic.es.close()
 
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["films"])
+app.include_router(genres.router, prefix="/api/v1/genres", tags=["genres"])
 
 if __name__ == "__main__":
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=8000,
-        log_config=LOGGING,
-        log_level=logging.DEBUG
-    )
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, log_config=LOGGING, log_level=logging.DEBUG)
