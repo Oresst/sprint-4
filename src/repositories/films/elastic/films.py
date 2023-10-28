@@ -20,7 +20,7 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
 
     async def get_films(
         self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
-    ) -> Optional[List[BaseFilm]]:
+    ) -> List[BaseFilm]:
         sort_dict = {}
         query_dict = {"bool": {"filter": []}}
 
@@ -38,7 +38,7 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
                 index="movies", query=query_dict, from_=(page_number - 1) * page_size, size=page_size, sort=sort_dict
             )
         except NotFoundError:
-            return None
+            return []
 
         films = []
 

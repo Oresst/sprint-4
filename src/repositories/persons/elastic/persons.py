@@ -4,7 +4,7 @@ from elasticsearch.exceptions import NotFoundError
 from typing import Optional, List
 
 from repositories.persons import AbstractDbPersonRepository
-from models.persons import DetailedPerson, Person
+from models.persons import DetailedPerson
 
 
 class PersonsElasticRepository(AbstractDbPersonRepository):
@@ -19,8 +19,8 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
         return DetailedPerson(**doc["_source"])
 
     async def get_persons(
-            self, sort: Optional[str], query: Optional[str], page_size: int, page_number: int
-    ) -> Optional[List[DetailedPerson]]:
+        self, sort: Optional[str], query: Optional[str], page_size: int, page_number: int
+    ) -> List[DetailedPerson]:
         sort_dict = {}
         query_dict = {"bool": {"filter": []}}
 
@@ -35,7 +35,7 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
                 index="persons", query=query_dict, from_=(page_number - 1) * page_size, size=page_size, sort=sort_dict
             )
         except NotFoundError:
-            return None
+            return []
 
         persons = []
 

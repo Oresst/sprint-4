@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 from typing import List, Optional
 
-from models.persons import Person
+from models.persons import BasePerson
 
 
 class BaseFilm(BaseModel):
@@ -11,10 +11,15 @@ class BaseFilm(BaseModel):
     imdb_rating: float
 
 
+class FilmRoles(BaseModel):
+    id: str = Field(serialization_alias="uuid")
+    roles: List[str]
+
+
 class DetailedFilm(BaseFilm):
     description: Optional[str]
-    actors: List[Person]
-    writers: List[Person]
+    actors: List[BasePerson]
+    writers: List[BasePerson]
     director: List[str] = Field(serialization_alias="directors")
 
 

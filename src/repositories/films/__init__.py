@@ -12,7 +12,7 @@ class AbstractDbFilmRepository(ABC):
     @abstractmethod
     async def get_films(
         self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
-    ) -> Optional[List[BaseFilm]]:
+    ) -> List[BaseFilm]:
         raise NotImplementedError
 
 

@@ -37,7 +37,7 @@ class FilmsService:
 
         films = await self._db.get_films(sort, query, genre, page_number, page_size)
 
-        if films is not None:
+        if films:
             await self._cache.save_films(sort, query, genre, page_number, page_size, films)
 
         return films
