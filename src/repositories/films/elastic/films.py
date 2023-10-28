@@ -1,8 +1,6 @@
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 
-from typing import Optional, List
-
 from repositories.films import AbstractDbFilmRepository
 from models.films import DetailedFilm
 from models.base_models import BaseFilm
@@ -12,14 +10,14 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
     def __init__(self, elastic: AsyncElasticsearch):
         self._elastic = elastic
 
-    async def get_film_by_id(self, film_id: str) -> Optional[DetailedFilm]:
+    async def get_film_by_id(self, film_id: str) -> DetailedFilm | None:
         try:
             doc = await self._elastic.get(index="movies", id=film_id)
         except NotFoundError:
             return None
         return DetailedFilm(**doc["_source"])
 
-    async def get_film_genres(self, film_id: str) -> Optional[List[str]]:
+    async def get_film_genres(self, film_id: str) -> list[str] | None:
         try:
             doc = await self._elastic.get(index="movies", id=film_id)
         except NotFoundError:
@@ -30,10 +28,10 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
         self,
         page_number: int = 1,
         page_size: int = 10,
-        sort: Optional[str] = None,
-        query: Optional[str] = None,
-        genre: Optional[str] = None,
-    ) -> List[BaseFilm]:
+        sort: str | None = None,
+        query: str | None = None,
+        genre: str | None = None,
+    ) -> list[BaseFilm]:
 
         sort_dict = {}
         query_dict = {"bool": {"filter": []}}

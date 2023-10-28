@@ -1,5 +1,4 @@
 from redis.asyncio import Redis
-from typing import Optional, List
 
 from repositories.films import AbstractCacheFilmRepository
 from core.config import app_settings
@@ -13,7 +12,7 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
     def __init__(self, redis: Redis):
         self._redis = redis
 
-    async def get_film_by_id(self, film_id: str) -> Optional[DetailedFilm]:
+    async def get_film_by_id(self, film_id: str) -> DetailedFilm | None:
         data = await self._redis.get(film_id)
 
         if not data:
@@ -29,10 +28,10 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         self,
         page_number: int,
         page_size: int,
-        sort: Optional[str] = None,
-        query: Optional[str] = None,
-        genre: Optional[str] = None,
-    ) -> Optional[ListBaseFilm]:
+        sort: str | None = None,
+        query: str | None = None,
+        genre: str | None = None,
+    ) -> ListBaseFilm | None:
 
         key = self._generate_key(page_number, page_size, sort, query, genre)
         data = await self._redis.get(key)
@@ -47,10 +46,10 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         self,
         page_number: int,
         page_size: int,
-        films: List[BaseFilm],
-        sort: Optional[str] = None,
-        query: Optional[str] = None,
-        genre: Optional[str] = None,
+        films: list[BaseFilm],
+        sort: str | None = None,
+        query: str | None = None,
+        genre: str | None = None,
     ) -> None:
 
         films = ListBaseFilm(films=films)
@@ -58,7 +57,7 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
 
         await self._redis.set(key, films.model_dump_json(), app_settings.redis_cache_expire)
 
-    async def get_alike_films(self, film_id: str) -> Optional[List[BaseFilm]]:
+    async def get_alike_films(self, film_id: str) -> list[BaseFilm] | None:
         key = self._generate_key("alike", film_id)
 
         data = await self._redis.get(key)
@@ -69,7 +68,7 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         films = ListBaseFilm.model_validate_json(data)
         return films.films
 
-    async def save_alike_films(self, film_id: str, films: List[BaseFilm]) -> None:
+    async def save_alike_films(self, film_id: str, films: list[BaseFilm]) -> None:
         key = self._generate_key("alike", film_id)
 
         films = ListBaseFilm(films=films)

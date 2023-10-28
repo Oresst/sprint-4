@@ -1,5 +1,4 @@
 from redis.asyncio import Redis
-from typing import Optional, List
 
 from repositories.persons import AbstractCachePersonRepository
 from core.config import app_settings
@@ -14,7 +13,7 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
     def __init__(self, redis: Redis):
         self._redis = redis
 
-    async def get_person_by_id(self, person_id: str) -> Optional[DetailedPerson]:
+    async def get_person_by_id(self, person_id: str) -> DetailedPerson | None:
         data = await self._redis.get(person_id)
 
         if not data:
@@ -27,8 +26,8 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
         await self._redis.set(person.id, person.model_dump_json(), app_settings.redis_cache_expire)
 
     async def get_persons(
-        self, page_number: int, page_size: int, sort: Optional[str] = None, query: Optional[str] = None
-    ) -> Optional[ListPerson]:
+        self, page_number: int, page_size: int, sort: str | None = None, query: str | None = None
+    ) -> ListPerson | None:
 
         key = self._generate_key(page_number, page_size, sort, query)
         data = await self._redis.get(key)
@@ -43,9 +42,9 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
         self,
         page_number: int,
         page_size: int,
-        persons: List[BasePerson],
-        sort: Optional[str] = None,
-        query: Optional[str] = None,
+        persons: list[BasePerson],
+        sort: str | None = None,
+        query: str | None = None,
     ) -> None:
 
         persons = ListPerson(persons=persons)
@@ -53,7 +52,7 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
 
         await self._redis.set(key, persons.model_dump_json(), app_settings.redis_cache_expire)
 
-    async def get_films_by_person_id(self, person_id: str) -> Optional[ListBaseFilm]:
+    async def get_films_by_person_id(self, person_id: str) -> ListBaseFilm | None:
         key = self._generate_key(person_id)
         data = await self._redis.get(key)
 

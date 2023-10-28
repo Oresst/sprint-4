@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.10
 
 ARG WD=/sprint-4
 ARG GROUP=sprint4

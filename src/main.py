@@ -1,6 +1,7 @@
 import logging
 
 import uvicorn
+from contextlib import asynccontextmanager
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -12,25 +13,23 @@ from core.logger import LOGGING
 from db import elastic
 from db import redis
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
+    elastic.es = AsyncElasticsearch(hosts=[f"http://{app_settings.elastic_host}:{app_settings.elastic_port}"])
+    yield
+    await redis.redis.close()
+    await elastic.es.close()
+
+
 app = FastAPI(
+    lifespan=lifespan,
     title=app_settings.project_name,
     docs_url="/api/openapi",
     openapi_url="/api/openapi.json",
     default_response_class=ORJSONResponse,
 )
-
-
-@app.on_event("startup")
-async def startup():
-    redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
-    elastic.es = AsyncElasticsearch(hosts=[f"http://{app_settings.elastic_host}:{app_settings.elastic_port}"])
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await redis.redis.close()
-    await elastic.es.close()
-
 
 app.include_router(films.router, prefix="/api/v1/films", tags=["films"])
 app.include_router(genres.router, prefix="/api/v1/genres", tags=["genres"])
