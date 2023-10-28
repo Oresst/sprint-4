@@ -17,6 +17,7 @@ class AppSettings(BaseSettings):
     elastic_host: str = Field(default="127.0.0.1", validation_alias="ELASTIC_HOST")
     elastic_port: int = Field(default=9200, validation_alias="ELASTIC_PORT")
 
+    person_cache_expire: int = Field(default=60 * 5)
     cache_expire: int = Field(default=60 * 5)
 
     class Config:
