@@ -1,5 +1,0 @@
-version: '3'
-services:
-  es_service:
-    ports:
-      - '9200:9200'

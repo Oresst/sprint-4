@@ -2,3 +2,4 @@
 venv/
 src/core/.env
 es_data/
+docker-compose.override.yml

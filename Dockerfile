@@ -11,12 +11,12 @@ RUN groupadd -r $GROUP \
     && chown $USER:$GROUP -R $WD \
     && chown $USER:$GROUP /var/log
 
-COPY --chown=$USER:$GROUP req.txt req.txt
+COPY --chown=$USER:$GROUP requirements.txt requirements.txt
 
 RUN apt update
 
 RUN  pip install --upgrade pip \
-     && pip install -r req.txt --no-cache-dir
+     && pip install -r requirements.txt --no-cache-dir
 
 COPY --chown=$USER:$GROUP . .
 

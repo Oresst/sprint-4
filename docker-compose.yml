@@ -2,7 +2,7 @@ version: '3'
 
 services:
   es_service:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.2
+    image: elasticsearch:8.9.1
     env_file:
       - src/core/.env
     environment:
@@ -17,6 +17,8 @@ services:
         hard: -1
     volumes:
       - es_data:/usr/share/elasticsearch/data
+    expose:
+      - 9200
     networks:
       - backend
 
@@ -26,8 +28,6 @@ services:
       - 6379
     networks:
       - backend
-    ports:
-      - "6379:6379"
 
   async_api:
     build: .
