@@ -23,7 +23,7 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         return film
 
     async def save_film_by_id(self, film: DetailedFilm) -> None:
-        await self._redis.set(film.id, film.model_dump_json(), app_settings.cache_expire)
+        await self._redis.set(film.id, film.model_dump_json(), app_settings.redis_cache_expire)
 
     async def get_films(
         self,
@@ -56,7 +56,7 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
         films = ListBaseFilm(films=films)
         key = self._generate_key(page_number, page_size, sort, query, genre)
 
-        await self._redis.set(key, films.model_dump_json(), app_settings.cache_expire)
+        await self._redis.set(key, films.model_dump_json(), app_settings.redis_cache_expire)
 
     async def get_alike_films(self, film_id: str) -> Optional[List[BaseFilm]]:
         key = self._generate_key("alike", film_id)
@@ -74,7 +74,7 @@ class FilmsRedisRepository(AbstractCacheFilmRepository):
 
         films = ListBaseFilm(films=films)
 
-        await self._redis.set(key, films.model_dump_json(), app_settings.cache_expire)
+        await self._redis.set(key, films.model_dump_json(), app_settings.redis_cache_expire)
 
     def _generate_key(self, *args) -> str:
         key = [self.tag]

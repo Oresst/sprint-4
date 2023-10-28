@@ -24,7 +24,7 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
         return person
 
     async def save_person_by_id(self, person: DetailedPerson) -> None:
-        await self._redis.set(person.id, person.model_dump_json(), app_settings.person_cache_expire)
+        await self._redis.set(person.id, person.model_dump_json(), app_settings.redis_cache_expire)
 
     async def get_persons(
         self, page_number: int, page_size: int, sort: Optional[str] = None, query: Optional[str] = None
@@ -51,7 +51,7 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
         persons = ListPerson(persons=persons)
         key = self._generate_key(page_number, page_size, sort, query)
 
-        await self._redis.set(key, persons.model_dump_json(), app_settings.person_cache_expire)
+        await self._redis.set(key, persons.model_dump_json(), app_settings.redis_cache_expire)
 
     async def get_films_by_person_id(self, person_id: str) -> Optional[ListBaseFilm]:
         key = self._generate_key(person_id)
@@ -65,7 +65,7 @@ class PersonsRedisRepository(AbstractCachePersonRepository):
 
     async def save_films_by_person_id(self, person_id: str, films: ListBaseFilm) -> None:
         key = self._generate_key(person_id)
-        await self._redis.set(key, films.model_dump_json(), app_settings.cache_expire)
+        await self._redis.set(key, films.model_dump_json(), app_settings.redis_cache_expire)
 
     def _generate_key(self, *args) -> str:
         key = [self.tag]

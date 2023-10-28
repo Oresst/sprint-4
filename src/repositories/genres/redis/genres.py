@@ -23,7 +23,7 @@ class GenresRedisRepository(AbstractCacheGenreRepository):
         return genre
 
     async def save_genre_by_id(self, genre: Genre) -> None:
-        await self._redis.set(genre.uuid, genre.model_dump_json(), app_settings.cache_expire)
+        await self._redis.set(genre.uuid, genre.model_dump_json(), app_settings.redis_cache_expire)
 
     async def get_genres(self) -> Optional[List[Genre]]:
         data = await self._redis.get(self.tag)
@@ -37,4 +37,4 @@ class GenresRedisRepository(AbstractCacheGenreRepository):
     async def save_genres(self, genres: List[Genre]) -> None:
         genres_list = GenreList(genres=genres)
 
-        await self._redis.set(self.tag, genres_list.model_dump_json(), app_settings.cache_expire)
+        await self._redis.set(self.tag, genres_list.model_dump_json(), app_settings.redis_cache_expire)
