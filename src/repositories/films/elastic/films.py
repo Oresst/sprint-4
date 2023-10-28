@@ -4,7 +4,8 @@ from elasticsearch.exceptions import NotFoundError
 from typing import Optional, List
 
 from repositories.films import AbstractDbFilmRepository
-from models.films import DetailedFilm, BaseFilm
+from models.films import DetailedFilm
+from models.base_models import BaseFilm
 
 
 class FilmsElasticRepository(AbstractDbFilmRepository):
@@ -18,8 +19,20 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
             return None
         return DetailedFilm(**doc["_source"])
 
+    async def get_film_genres(self, film_id: str) -> Optional[List[str]]:
+        try:
+            doc = await self._elastic.get(index="movies", id=film_id)
+        except NotFoundError:
+            return None
+        return doc["_source"]["genre"]
+
     async def get_films(
-        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
+        self,
+        page_number: int = 1,
+        page_size: int = 10,
+        sort: Optional[str] = None,
+        query: Optional[str] = None,
+        genre: Optional[str] = None,
     ) -> List[BaseFilm]:
 
         sort_dict = {}

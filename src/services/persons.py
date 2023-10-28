@@ -4,6 +4,7 @@ from typing import Optional, List
 from functools import lru_cache
 
 from models.persons import DetailedPerson
+from models.base_models import BaseFilm
 from repositories.persons import AbstractDbPersonRepository, AbstractCachePersonRepository
 from repositories.persons.redis import get_persons_redis_repo
 from repositories.persons.elastic import get_persons_elastic_repo
@@ -28,19 +29,32 @@ class PersonsService:
         return person
 
     async def get_persons(
-        self, sort: Optional[str], query: Optional[str], page_number: int, page_size: int
+        self, page_number: int, page_size: int, sort: Optional[str] = None, query: Optional[str] = None
     ) -> List[DetailedPerson]:
-        persons = await self._cache.get_persons(sort, query, page_number, page_size)
+        persons = await self._cache.get_persons(page_number, page_size, sort=sort, query=query)
 
         if persons is not None:
             return persons.persons
 
-        persons = await self._db.get_persons(sort, query, page_number, page_size)
+        persons = await self._db.get_persons(page_number, page_size, sort=sort, query=query)
 
         if persons:
-            await self._cache.save_persons(sort, query, page_number, page_size, persons)
+            await self._cache.save_persons(page_number, page_size, persons, sort=sort, query=query)
 
         return persons
+
+    async def get_films_by_person_id(self, person_id: str) -> List[BaseFilm]:
+        films = await self._cache.get_films_by_person_id(person_id)
+
+        if films is not None:
+            return films.films
+
+        films = await self._db.get_films_by_person_id(person_id)
+
+        if films:
+            await self._cache.save_films_by_person_id(person_id, films)
+
+        return films.films
 
 
 @lru_cache()

@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Optional, List
 
-from models.films import DetailedFilm, BaseFilm, ListBaseFilm
+from models.films import DetailedFilm, ListBaseFilm
+from models.base_models import BaseFilm
 
 
 class AbstractDbFilmRepository(ABC):
@@ -10,8 +11,17 @@ class AbstractDbFilmRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
+    async def get_film_genres(self, film_id: str) -> Optional[List[str]]:
+        raise NotImplementedError
+
+    @abstractmethod
     async def get_films(
-        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_size: int, page_number: int
+        self,
+        page_number: int = 1,
+        page_size: int = 10,
+        sort: Optional[str] = None,
+        query: Optional[str] = None,
+        genre: Optional[str] = None,
     ) -> List[BaseFilm]:
         raise NotImplementedError
 
@@ -27,18 +37,31 @@ class AbstractCacheFilmRepository(ABC):
 
     @abstractmethod
     async def get_films(
-        self, sort: Optional[str], query: Optional[str], genre: Optional[str], page_number: int, page_size: int
+        self,
+        page_number: int,
+        page_size: int,
+        sort: Optional[str] = None,
+        query: Optional[str] = None,
+        genre: Optional[str] = None,
     ) -> Optional[ListBaseFilm]:
         raise NotImplementedError
 
     @abstractmethod
     async def save_films(
         self,
-        sort: Optional[str],
-        query: Optional[str],
-        genre: Optional[str],
         page_number: int,
         page_size: int,
         films: List[BaseFilm],
+        sort: Optional[str] = None,
+        query: Optional[str] = None,
+        genre: Optional[str] = None,
     ) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def get_alike_films(self, film_id: str) -> Optional[List[BaseFilm]]:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def save_alike_films(self, film_id: str, films: List[BaseFilm]) -> None:
         raise NotImplementedError

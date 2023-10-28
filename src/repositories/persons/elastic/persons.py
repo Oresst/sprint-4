@@ -5,21 +5,22 @@ from typing import Optional, List
 
 from repositories.persons import AbstractDbPersonRepository
 from models.persons import DetailedPerson
+from models.films import ListBaseFilm
 
 
 class PersonsElasticRepository(AbstractDbPersonRepository):
     def __init__(self, elastic: AsyncElasticsearch):
         self._elastic = elastic
 
-    async def get_person_by_id(self, persons_id: str) -> Optional[DetailedPerson]:
+    async def get_person_by_id(self, person_id: str) -> Optional[DetailedPerson]:
         try:
-            doc = await self._elastic.get(index="persons", id=persons_id)
+            doc = await self._elastic.get(index="persons", id=person_id)
         except NotFoundError:
             return None
         return DetailedPerson(**doc["_source"])
 
     async def get_persons(
-        self, sort: Optional[str], query: Optional[str], page_size: int, page_number: int
+        self, page_number: int, page_size: int, sort: Optional[str] = None, query: Optional[str] = None
     ) -> List[DetailedPerson]:
         sort_dict = {}
         query_dict = {"bool": {"filter": []}}
@@ -43,3 +44,11 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
             persons.append(DetailedPerson(**person["_source"]))
 
         return persons
+
+    async def get_films_by_person_id(self, person_id: str) -> ListBaseFilm:
+        try:
+            doc = await self._elastic.get(index="persons", id=person_id)
+        except NotFoundError:
+            return ListBaseFilm(films=[])
+
+        return ListBaseFilm(**doc["_source"])

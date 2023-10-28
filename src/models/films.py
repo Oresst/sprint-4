@@ -2,13 +2,7 @@ from pydantic import BaseModel, Field
 
 from typing import List, Optional
 
-from models.persons import BasePerson
-
-
-class BaseFilm(BaseModel):
-    id: str = Field(serialization_alias="uuid")
-    title: str
-    imdb_rating: float
+from models.base_models import BasePerson, BaseFilm
 
 
 class FilmRoles(BaseModel):

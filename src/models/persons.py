@@ -1,11 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+
 from typing import List
+
 from models.films import FilmRoles
-
-
-class BasePerson(BaseModel):
-    id: str = Field(serialization_alias="uuid")
-    name: str = Field(serialization_alias="full_name")
+from models.base_models import BasePerson
 
 
 class DetailedPerson(BasePerson):
