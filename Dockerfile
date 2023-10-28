@@ -1,15 +1,24 @@
 FROM python:3.8
 
+ARG WD=/sprint-4
+ARG GROUP=sprint4
+ARG USER=fastapi
+
+WORKDIR $WD
+
+RUN groupadd -r $GROUP \
+    && useradd -d $WD -r -g $GROUP $USER \
+    && chown $USER:$GROUP -R $WD \
+    && chown $USER:$GROUP /var/log
+
+COPY --chown=$USER:$GROUP req.txt req.txt
+
 RUN apt update
-
-WORKDIR /sprint-4
-
-COPY req.txt req.txt
 
 RUN  pip install --upgrade pip \
      && pip install -r req.txt --no-cache-dir
 
-COPY . .
+COPY --chown=$USER:$GROUP . .
 
 # Укажите, как запускать ваш сервис
-CMD ["python3", "src/main.py"]
+ENTRYPOINT ["python3", "src/main.py"]
