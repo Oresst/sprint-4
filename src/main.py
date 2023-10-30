@@ -1,6 +1,5 @@
-import logging
-
 from contextlib import asynccontextmanager
+
 from elasticsearch import AsyncElasticsearch
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
@@ -9,13 +8,12 @@ from gunicorn.app.base import BaseApplication
 
 from api.v1 import films, persons, genres
 from core.config import app_settings
-from core.logger import LOGGING
 from db import elastic
 from db import redis
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(fastapi_app: FastAPI):
     redis.redis = Redis(host=app_settings.redis_host, port=app_settings.redis_port)
     elastic.es = AsyncElasticsearch(hosts=[f"http://{app_settings.elastic_host}:{app_settings.elastic_port}"])
     yield
@@ -39,9 +37,9 @@ app.include_router(persons.router, prefix="/api/v1/persons", tags=["persons"])
 class StandaloneApplication(BaseApplication):
     """Our Gunicorn application."""
 
-    def __init__(self, app, options=None):
-        self.options = options or {}
-        self.application = app
+    def __init__(self, fastapi_app, gunicorn_options=None):
+        self.options = gunicorn_options or {}
+        self.application = fastapi_app
         super().__init__()
 
     def load_config(self):

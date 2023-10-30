@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from main import app
+from src.main import app
 
 
 endpoints = [
@@ -16,10 +16,9 @@ endpoints = [
     '/api/v1/persons/466c8350-fda7-44b4-a08f-afceaa16bc31/film',
 ]
 
-client = TestClient(app)
-
 
 @pytest.mark.parametrize('endpoint', endpoints)
 def test_status(endpoint: str):
-    response = client.get(endpoint)
-    assert response.status_code == 200
+    with TestClient(app) as client:
+        response = client.get(endpoint)
+        assert response.status_code == 200
