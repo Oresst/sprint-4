@@ -8,6 +8,7 @@ services:
     environment:
       - 'discovery.type=single-node'
       - 'xpack.security.enabled=false'
+      - 'xpack.security.http.ssl.enabled=false'
       - 'cluster.name=docker-cluster'
       - 'bootstrap.memory_lock=true'
       - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
