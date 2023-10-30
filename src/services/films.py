@@ -1,13 +1,12 @@
-from fastapi import Depends
-
-from typing import Optional, List
 from functools import lru_cache
+
+from fastapi import Depends
 
 from models.films import DetailedFilm
 from models.base_models import BaseFilm
-from repositories.films import AbstractDbFilmRepository, AbstractCacheFilmRepository
 from repositories.films.redis import get_films_redis_repo
 from repositories.films.elastic import get_films_elastic_repo
+from repositories.films import AbstractDbFilmRepository, AbstractCacheFilmRepository
 
 
 class FilmsService:
@@ -15,7 +14,7 @@ class FilmsService:
         self._cache = redis_repo
         self._db = elastic_repo
 
-    async def get_film_by_id(self, film_id: str) -> Optional[DetailedFilm]:
+    async def get_film_by_id(self, film_id: str) -> DetailedFilm | None:
         film = await self._cache.get_film_by_id(film_id)
 
         if film is not None:
@@ -29,13 +28,13 @@ class FilmsService:
         return film
 
     async def get_films(
-        self,
-        page_number: int = 1,
-        page_size: int = 10,
-        sort: Optional[str] = None,
-        query: Optional[str] = None,
-        genre: Optional[str] = None,
-    ) -> List[BaseFilm]:
+            self,
+            page_number: int = 1,
+            page_size: int = 10,
+            sort: str | None = None,
+            query: str | None = None,
+            genre: str | None = None,
+    ) -> list[BaseFilm]:
 
         films = await self._cache.get_films(page_number, page_size, sort=sort, query=query, genre=genre)
 
@@ -49,7 +48,7 @@ class FilmsService:
 
         return films
 
-    async def get_alike_films(self, film_id: str) -> Optional[List[BaseFilm]]:
+    async def get_alike_films(self, film_id: str) -> list[BaseFilm] | None:
         films = await self._cache.get_alike_films(film_id)
 
         if films is not None:
@@ -69,7 +68,7 @@ class FilmsService:
 
 @lru_cache()
 def get_films_service(
-    redis_repo: AbstractCacheFilmRepository = Depends(get_films_redis_repo),
-    es_repo: AbstractDbFilmRepository = Depends(get_films_elastic_repo),
+        redis_repo: AbstractCacheFilmRepository = Depends(get_films_redis_repo),
+        es_repo: AbstractDbFilmRepository = Depends(get_films_elastic_repo),
 ) -> FilmsService:
     return FilmsService(redis_repo, es_repo)

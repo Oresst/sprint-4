@@ -1,7 +1,6 @@
 from elasticsearch import AsyncElasticsearch
 from elasticsearch.exceptions import NotFoundError
 
-from typing import Optional, List
 
 from repositories.persons import AbstractDbPersonRepository
 from models.persons import DetailedPerson
@@ -12,7 +11,7 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
     def __init__(self, elastic: AsyncElasticsearch):
         self._elastic = elastic
 
-    async def get_person_by_id(self, person_id: str) -> Optional[DetailedPerson]:
+    async def get_person_by_id(self, person_id: str) -> DetailedPerson | None:
         try:
             doc = await self._elastic.get(index="persons", id=person_id)
         except NotFoundError:
@@ -20,8 +19,8 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
         return DetailedPerson(**doc["_source"])
 
     async def get_persons(
-        self, page_number: int, page_size: int, sort: Optional[str] = None, query: Optional[str] = None
-    ) -> List[DetailedPerson]:
+        self, page_number: int, page_size: int, sort: str | None = None, query: str | None = None
+    ) -> list[DetailedPerson]:
         sort_dict = {}
         query_dict = {"bool": {"filter": []}}
 

@@ -1,13 +1,12 @@
-from fastapi import Depends
-
-from typing import Optional, List
 from functools import lru_cache
 
-from models.persons import DetailedPerson
+from fastapi import Depends
+
 from models.base_models import BaseFilm
-from repositories.persons import AbstractDbPersonRepository, AbstractCachePersonRepository
+from models.persons import DetailedPerson
 from repositories.persons.redis import get_persons_redis_repo
 from repositories.persons.elastic import get_persons_elastic_repo
+from repositories.persons import AbstractDbPersonRepository, AbstractCachePersonRepository
 
 
 class PersonsService:
@@ -15,7 +14,7 @@ class PersonsService:
         self._cache = redis_repo
         self._db = elastic_repo
 
-    async def get_person_by_id(self, person_id: str) -> Optional[DetailedPerson]:
+    async def get_person_by_id(self, person_id: str) -> DetailedPerson | None:
         person = await self._cache.get_person_by_id(person_id)
 
         if person is not None:
@@ -29,8 +28,8 @@ class PersonsService:
         return person
 
     async def get_persons(
-        self, page_number: int, page_size: int, sort: Optional[str] = None, query: Optional[str] = None
-    ) -> List[DetailedPerson]:
+        self, page_number: int, page_size: int, sort: str | None = None, query: str | None = None
+    ) -> list[DetailedPerson]:
         persons = await self._cache.get_persons(page_number, page_size, sort=sort, query=query)
 
         if persons is not None:
@@ -43,7 +42,7 @@ class PersonsService:
 
         return persons
 
-    async def get_films_by_person_id(self, person_id: str) -> List[BaseFilm]:
+    async def get_films_by_person_id(self, person_id: str) -> list[BaseFilm]:
         films = await self._cache.get_films_by_person_id(person_id)
 
         if films is not None:

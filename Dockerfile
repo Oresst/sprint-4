@@ -1,6 +1,6 @@
-FROM python:3.8
+FROM python:3.10
 
-ARG WD=/sprint-4
+ARG WD=/opt/sprint4
 ARG GROUP=sprint4
 ARG USER=fastapi
 
@@ -18,7 +18,7 @@ RUN apt update
 RUN  pip install --upgrade pip \
      && pip install -r requirements.txt --no-cache-dir
 
-COPY --chown=$USER:$GROUP . .
+COPY --chown=$USER:$GROUP src .
 
 # Укажите, как запускать ваш сервис
-ENTRYPOINT ["python3", "src/main.py"]
+ENTRYPOINT ["python3", "main.py"]

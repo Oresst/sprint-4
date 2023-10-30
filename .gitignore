@@ -2,4 +2,6 @@
 venv/
 src/core/.env
 es_data/
+nginx/logs/
 docker-compose.override.yml
+.env

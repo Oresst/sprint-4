@@ -1,12 +1,11 @@
+from functools import lru_cache
+
 from fastapi import Depends
 
-from functools import lru_cache
-from typing import Optional, List
-
-from repositories.genres import AbstractDbGenresRepository, AbstractCacheGenreRepository
-from repositories.genres.elastic import get_genres_elastic_repo
-from repositories.genres.redis import get_genre_redis_repo
 from models.genres import Genre
+from repositories.genres.redis import get_genre_redis_repo
+from repositories.genres.elastic import get_genres_elastic_repo
+from repositories.genres import AbstractDbGenresRepository, AbstractCacheGenreRepository
 
 
 class GenresService:
@@ -14,7 +13,7 @@ class GenresService:
         self._db = db
         self._cache = cache
 
-    async def get_genre_by_id(self, genre_id: str) -> Optional[Genre]:
+    async def get_genre_by_id(self, genre_id: str) -> Genre | None:
         genre = await self._cache.get_genre_by_id(genre_id)
 
         if genre is not None:
@@ -27,7 +26,7 @@ class GenresService:
 
         return genre
 
-    async def get_genres(self) -> List[Genre]:
+    async def get_genres(self) -> list[Genre]:
         genres = await self._cache.get_genres()
 
         if genres is not None:

@@ -1,22 +1,21 @@
 from abc import ABC, abstractmethod
-from typing import List, Optional
 
 from models.genres import Genre
 
 
 class AbstractDbGenresRepository(ABC):
     @abstractmethod
-    async def get_genre_by_id(self, genre_id: str) -> Optional[Genre]:
+    async def get_genre_by_id(self, genre_id: str) -> Genre | None:
         raise NotImplementedError
 
     @abstractmethod
-    async def get_genres(self) -> List[Genre]:
+    async def get_genres(self) -> list[Genre]:
         raise NotImplementedError
 
 
 class AbstractCacheGenreRepository(ABC):
     @abstractmethod
-    async def get_genre_by_id(self, genre_id: str) -> Optional[Genre]:
+    async def get_genre_by_id(self, genre_id: str) -> Genre | None:
         raise NotImplementedError
 
     @abstractmethod
@@ -24,9 +23,9 @@ class AbstractCacheGenreRepository(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def get_genres(self) -> Optional[List[Genre]]:
+    async def get_genres(self) -> list[Genre] | None:
         raise NotImplementedError
 
     @abstractmethod
-    async def save_genres(self, genres: List[Genre]) -> None:
+    async def save_genres(self, genres: list[Genre]) -> None:
         raise NotImplementedError
