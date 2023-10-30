@@ -1,6 +1,7 @@
+from http import HTTPStatus
+
 from fastapi import APIRouter, Depends, HTTPException
 
-from http import HTTPStatus
 from models.films import DetailedFilm
 from models.base_models import BaseFilm
 from services.films import get_films_service, FilmsService

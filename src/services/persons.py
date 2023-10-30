@@ -1,12 +1,12 @@
-from fastapi import Depends
-
 from functools import lru_cache
 
-from models.persons import DetailedPerson
+from fastapi import Depends
+
 from models.base_models import BaseFilm
-from repositories.persons import AbstractDbPersonRepository, AbstractCachePersonRepository
+from models.persons import DetailedPerson
 from repositories.persons.redis import get_persons_redis_repo
 from repositories.persons.elastic import get_persons_elastic_repo
+from repositories.persons import AbstractDbPersonRepository, AbstractCachePersonRepository
 
 
 class PersonsService:

@@ -1,8 +1,8 @@
 import os
+from logging import config as logging_config
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from logging import config as logging_config
 
 from .logger import LOGGING
 

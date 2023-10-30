@@ -1,11 +1,11 @@
-from fastapi import Depends
-
 from functools import lru_cache
 
-from repositories.genres import AbstractDbGenresRepository, AbstractCacheGenreRepository
-from repositories.genres.elastic import get_genres_elastic_repo
-from repositories.genres.redis import get_genre_redis_repo
+from fastapi import Depends
+
 from models.genres import Genre
+from repositories.genres.redis import get_genre_redis_repo
+from repositories.genres.elastic import get_genres_elastic_repo
+from repositories.genres import AbstractDbGenresRepository, AbstractCacheGenreRepository
 
 
 class GenresService:

@@ -1,12 +1,12 @@
-from fastapi import Depends
-
 from functools import lru_cache
+
+from fastapi import Depends
 
 from models.films import DetailedFilm
 from models.base_models import BaseFilm
-from repositories.films import AbstractDbFilmRepository, AbstractCacheFilmRepository
 from repositories.films.redis import get_films_redis_repo
 from repositories.films.elastic import get_films_elastic_repo
+from repositories.films import AbstractDbFilmRepository, AbstractCacheFilmRepository
 
 
 class FilmsService:
