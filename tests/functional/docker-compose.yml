@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+  es_service:
+    extends:
+      file: ../../common.yaml
+      service: es_service
+    ports:
+      - '9200:9200'
+    networks:
+      - backend
+
+  redis_service:
+    extends:
+      file: ../../common.yaml
+      service: redis_service
+    ports:
+      - '6379:6379'
+    networks:
+      - backend
+
+  async_api:
+    extends:
+      file: ../../common.yaml
+      service: async_api
+#    image: async_api-image
+    depends_on:
+      - es_service
+      - redis_service
+    ports:
+      - "8001:8000"
+    networks:
+      - backend
+
+  tests_func:
+    build:
+      context: .
+    image: tests_func-image
+    env_file:
+      - env/container.env
+    depends_on:
+      - es_service
+      - redis_service
+      - async_api
+    expose:
+      - 8000
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

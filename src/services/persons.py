@@ -28,7 +28,11 @@ class PersonsService:
         return person
 
     async def get_persons(
-        self, page_number: int, page_size: int, sort: str | None = None, query: str | None = None
+            self,
+            page_number: int = 1,
+            page_size: int = 50,
+            sort: str | None = None,
+            query: str | None = None
     ) -> list[DetailedPerson]:
         persons = await self._cache.get_persons(page_number, page_size, sort=sort, query=query)
 
@@ -58,7 +62,7 @@ class PersonsService:
 
 @lru_cache()
 def get_persons_service(
-    redis_repo: AbstractCachePersonRepository = Depends(get_persons_redis_repo),
-    es_repo: AbstractDbPersonRepository = Depends(get_persons_elastic_repo),
+        redis_repo: AbstractCachePersonRepository = Depends(get_persons_redis_repo),
+        es_repo: AbstractDbPersonRepository = Depends(get_persons_elastic_repo),
 ) -> PersonsService:
     return PersonsService(redis_repo, es_repo)

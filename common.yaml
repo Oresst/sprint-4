@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  es_service:
+    image: elasticsearch:8.9.1
+    env_file:
+      - src/core/.env
+    environment:
+      - 'discovery.type=single-node'
+      - 'xpack.security.enabled=false'
+      - 'xpack.security.http.ssl.enabled=false'
+      - 'cluster.name=docker-cluster'
+      - 'bootstrap.memory_lock=true'
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    expose:
+      - 9200
+    networks:
+      - backend
+
+  redis_service:
+    image: redis
+    expose:
+      - 6379
+    networks:
+      - backend
+
+  async_api:
+    build: .
+    image: async_api-image
+    env_file:
+      - src/core/.env
+    expose:
+      - 8000
+    networks:
+      - backend
+
+
+networks:
+  backend:
+    driver: bridge

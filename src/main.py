@@ -55,7 +55,7 @@ class StandaloneApplication(BaseApplication):
 
 
 options = {
-    "bind": "0.0.0.0",
+    "bind": "0.0.0.0:8000",
     "accesslog": "-",
     "errorlog": "-",
     "worker_class": "uvicorn.workers.UvicornWorker",
