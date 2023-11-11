@@ -80,5 +80,5 @@ async def es_write_data(es_client: AsyncElasticsearch):
 
 @pytest_asyncio.fixture(scope="session")
 async def ac() -> AsyncGenerator[ClientSession, None]:
-    async with ClientSession() as ac:
+    async with ClientSession(base_url=test_app_settings.service_url) as ac:
         yield ac
