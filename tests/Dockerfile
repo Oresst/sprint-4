@@ -4,7 +4,7 @@ ARG WD=/opt/tests
 ARG GROUP=sprint4
 ARG USER=fastapi
 
-ENV PATHONPATH=/opt/tests
+ENV PYTHONPATH=/opt/tests/
 
 WORKDIR $WD
 

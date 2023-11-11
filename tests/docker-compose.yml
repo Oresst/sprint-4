@@ -10,6 +10,8 @@ services:
       - redis_service_test
     expose:
       - 8000
+    ports:
+      - "8000:8000"
     networks:
       - backend_test
 
@@ -22,8 +24,6 @@ services:
       - .env
     depends_on:
       - async_api_test
-    ports:
-      - "8000:8000"
     networks:
       - backend_test
 
