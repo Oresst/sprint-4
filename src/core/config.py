@@ -19,10 +19,6 @@ class AppSettings(BaseSettings):
 
     redis_cache_expire: int = Field(default=60 * 5)
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-
 
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

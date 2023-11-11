@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+  async_api_test:
+    build: ../.
+    env_file:
+      - .env
+    depends_on:
+      - es_service_test
+      - redis_service_test
+    expose:
+      - 8000
+    networks:
+      - backend_test
+
+  tests:
+    build: .
+    entrypoint: >
+      sh -c "python3 functional/utils/wait_for_es.py
+      && pytest functional/src"
+    env_file:
+      - .env
+    depends_on:
+      - async_api_test
+    ports:
+      - "8000:8000"
+    networks:
+      - backend_test
+
+  es_service_test:
+    image: elasticsearch:8.9.1
+    environment:
+      - 'discovery.type=single-node'
+      - 'xpack.security.enabled=false'
+      - 'xpack.security.http.ssl.enabled=false'
+      - 'cluster.name=docker-cluster'
+      - 'bootstrap.memory_lock=true'
+      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
+    expose:
+      - 9200
+    ports:
+      - "9200:9200"
+    networks:
+      - backend_test
+
+  redis_service_test:
+    image: redis
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+    networks:
+      - backend_test
+
+networks:
+  backend_test:
+    driver: bridge
