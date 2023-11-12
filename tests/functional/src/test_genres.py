@@ -10,7 +10,7 @@ from functional.test_data.movies_data import movies_data
 
 @pytest.mark.asyncio
 async def test_get_genre_200(ac: ClientSession):
-    genre = choice(genres_data)
+    genre = choice(genres_data).copy()
     genre["uuid"] = genre.pop("id")
 
     async with ac.get("/api/v1/genres/{0}".format(genre["uuid"])) as response:
@@ -41,7 +41,7 @@ async def test_get_all_genres(ac: ClientSession):
 
 @pytest.mark.asyncio
 async def test_get_popular_films_by_genre(ac: ClientSession):
-    genre = choice(genres_data)
+    genre = choice(genres_data).copy()
 
     async with ac.get("/api/v1/genres/{0}/popular".format(genre["name"])) as response:
         body = await response.json()

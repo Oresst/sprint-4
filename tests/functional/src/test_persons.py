@@ -9,7 +9,7 @@ from functional.test_data.persons_data import persons_data
 
 @pytest.mark.asyncio
 async def test_get_person_200(ac: ClientSession):
-    person = choice(persons_data)
+    person = choice(persons_data).copy()
     person["uuid"] = person.pop("id")
 
     async with ac.get("/api/v1/persons/{0}".format(person["uuid"])) as response:
@@ -68,7 +68,7 @@ async def test_get_persons_search(ac: ClientSession, query_data, expected_answer
 
 @pytest.mark.asyncio
 async def test_get_films_by_person(ac: ClientSession):
-    person = choice(persons_data)
+    person = choice(persons_data).copy()
 
     async with ac.get("/api/v1/persons/{0}/film".format(person["id"])) as response:
         body = await response.json()
