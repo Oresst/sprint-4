@@ -1,7 +1,7 @@
 import asyncio
 import logging
 
-import redis
+from redis.asyncio import Redis
 import pytest
 import aiohttp
 from yarl import URL
@@ -9,7 +9,8 @@ from elasticsearch import AsyncElasticsearch
 from elasticsearch.helpers import async_bulk
 
 from settings import test_settings
-from utils.helpers import es_generate_actions, es_index_rows_generator
+from testdata import index_data_map, index_attributes_map
+from utils.helpers import es_generate_actions
 
 LOGGER = logging.getLogger(__name__)
 
@@ -24,15 +25,15 @@ def event_loop():
 
 @pytest.fixture(scope='session')
 async def redis_client():
-    client = redis.Redis(host=test_settings.redis_host, port=test_settings.redis_port)
+    client = Redis(host=test_settings.redis_host, port=test_settings.redis_port)
     LOGGER.info('Redis client open')
     yield client
-    del client
+    await client.aclose()
     LOGGER.info('Redis client closed')
 
 
 @pytest.fixture(scope='session')
-def redis_reset(redis_client: redis.Redis):
+def redis_reset(redis_client: Redis):
     def inner():
         redis_client.flushdb()
         LOGGER.info('Redis cache cleared')
@@ -51,10 +52,11 @@ async def es_client():
 
 @pytest.fixture(scope="class")
 def es_index_create(es_client: AsyncElasticsearch):
-    async def inner(index_map: dict, index_name: str):
+    async def inner(index_name: str):
         if not await es_client.indices.exists(index=index_name):
+            index_attributes = index_attributes_map[index_name]
             LOGGER.info(f'ES index "{index_name}" created')
-            await es_client.indices.create(index=index_name, **index_map)
+            await es_client.indices.create(index=index_name, **index_attributes)
 
     return inner
 
@@ -80,9 +82,9 @@ def clear_db_data(es_index_remove, redis_reset):
 
 @pytest.fixture(scope="class")
 def es_write_data(es_client: AsyncElasticsearch, es_index_create):
-    async def inner(index_name: str, index_map: dict, rows_cnt: int = 1):
-        await es_index_create(index_map, index_name)
-        data = es_index_rows_generator(index_name, rows_cnt)
+    async def inner(index_name: str):
+        await es_index_create(index_name)
+        data = index_data_map[index_name]
         bulk_data = es_generate_actions(index_name, data)
         success, errors = await async_bulk(es_client, bulk_data)
         LOGGER.info(f'Written into ES: success {success}, errors {len(errors)}')
