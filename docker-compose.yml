@@ -2,45 +2,22 @@ version: '3'
 
 services:
   es_service:
-    image: elasticsearch:8.9.1
-    env_file:
-      - src/core/.env
-    environment:
-      - 'discovery.type=single-node'
-      - 'xpack.security.enabled=false'
-      - 'xpack.security.http.ssl.enabled=false'
-      - 'cluster.name=docker-cluster'
-      - 'bootstrap.memory_lock=true'
-      - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
+    extends:
+      file: common.yaml
+      service: es_service
     volumes:
       - es_data:/usr/share/elasticsearch/data
-    expose:
-      - 9200
-    networks:
-      - backend
 
   redis_service:
-    image: redis
-    expose:
-      - 6379
-    networks:
-      - backend
+    extends:
+      file: common.yaml
+      service: redis_service
 
   async_api:
-    build: .
-    env_file:
-      - src/core/.env
-    depends_on:
-      - es_service
-      - redis_service
-    expose:
-      - 8000
-    networks:
-      - backend
+    extends:
+      file: common.yaml
+      service: async_api
+
 
   nginx:
     image: nginx:latest
@@ -53,8 +30,6 @@ services:
       - async_api
     ports:
       - '80:80'
-    networks:
-      - backend
 
 volumes:
   es_data:
