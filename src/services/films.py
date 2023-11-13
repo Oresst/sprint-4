@@ -10,9 +10,9 @@ from repositories.films import AbstractDbFilmRepository, AbstractCacheFilmReposi
 
 
 class FilmsService:
-    def __init__(self, redis_repo: AbstractCacheFilmRepository, elastic_repo: AbstractDbFilmRepository):
-        self._cache = redis_repo
-        self._db = elastic_repo
+    def __init__(self, cache: AbstractCacheFilmRepository, db: AbstractDbFilmRepository):
+        self._cache = cache
+        self._db = db
 
     async def get_film_by_id(self, film_id: str) -> DetailedFilm | None:
         film = await self._cache.get_film_by_id(film_id)
@@ -68,7 +68,7 @@ class FilmsService:
 
 @lru_cache()
 def get_films_service(
-        redis_repo: AbstractCacheFilmRepository = Depends(get_films_redis_repo),
-        es_repo: AbstractDbFilmRepository = Depends(get_films_elastic_repo),
+        cache: AbstractCacheFilmRepository = Depends(get_films_redis_repo),
+        db: AbstractDbFilmRepository = Depends(get_films_elastic_repo),
 ) -> FilmsService:
-    return FilmsService(redis_repo, es_repo)
+    return FilmsService(cache, db)
