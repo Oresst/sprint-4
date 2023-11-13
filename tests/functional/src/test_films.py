@@ -2,7 +2,9 @@ import time
 import logging
 from random import choice
 
+
 import pytest
+from http import HTTPStatus
 
 from testdata import movies_data
 
@@ -29,19 +31,19 @@ class TestMovies:
         [
             (
                     {'query1': 'TEST', 'page_size1': 30},
-                    {'status': 200, 'length': 10}
+                    {'status': HTTPStatus.OK, 'length': 10}
             ),
             (  # return a number of films
                     {'page_size': 3},
-                    {'status': 200, 'length': 3}
+                    {'status': HTTPStatus.OK, 'length': 3}
             ),
             (  # search by a phrase
                     {'query': 'Star', 'page_size': 1},
-                    {'status': 200, 'length': 1}
+                    {'status': HTTPStatus.OK, 'length': 1}
             ),
             (  # get all films
                     {'page_size': 60},
-                    {'status': 200, 'length': 60}
+                    {'status': HTTPStatus.OK, 'length': 60}
             ),
         ]
     )
@@ -53,8 +55,8 @@ class TestMovies:
     @pytest.mark.parametrize(
         'film_id, expected_answer',
         [
-            ('biuOIGByo', {'status': 404}),
-            (test_item["id"], {'status': 200}),
+            ('biuOIGByo', {'status': HTTPStatus.NOT_FOUND}),
+            (test_item["id"], {'status': HTTPStatus.OK}),
         ]
     )
     async def test_valid(self, make_get_request, film_id, expected_answer):
@@ -68,7 +70,7 @@ class TestMovies:
             (
                     {'k': 'films-1-1', 'v': '{"films":[{"id":"","title":"","imdb_rating":-10}]}'},
                     {'page_number': 1, 'page_size': 1},
-                    {'status': 200, 'length': 1, 'imdb_rating': -10}
+                    {'status': HTTPStatus.OK, 'length': 1, 'imdb_rating': -10}
             )
         ]
     )

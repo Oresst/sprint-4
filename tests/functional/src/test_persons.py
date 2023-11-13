@@ -1,5 +1,6 @@
 import time
 import logging
+from http import HTTPStatus
 from random import choice
 
 import pytest
@@ -27,9 +28,9 @@ class TestPersons:
     @pytest.mark.parametrize(
         '_id, expected_answer',
         [
-            ('biuOIGByo', {'status': 404}),
-            (test_item["id"], {'status': 200}),
-            (f'{test_item["id"]}/film', {'status': 200}),
+            ('biuOIGByo', {'status': HTTPStatus.NOT_FOUND}),
+            (test_item["id"], {'status': HTTPStatus.OK}),
+            (f'{test_item["id"]}/film', {'status': HTTPStatus.OK}),
         ]
     )
     async def test_person(self, make_get_request, _id, expected_answer):
@@ -42,19 +43,19 @@ class TestPersons:
         [
             (
                     {'query1': 'TEST', 'page_size1': 30},
-                    {'status': 200, 'length': 10}
+                    {'status': HTTPStatus.OK, 'length': 10}
             ),
             (  # return a number of rows
                     {'page_size': 3},
-                    {'status': 200, 'length': 3}
+                    {'status': HTTPStatus.OK, 'length': 3}
             ),
             (  # search by a phrase
                     {'query': 'Victoria Negri', 'page_size': 1},
-                    {'status': 200, 'length': 1}
+                    {'status': HTTPStatus.OK, 'length': 1}
             ),
             (  # get all rows
                     {'page_size': 10000},
-                    {'status': 200}
+                    {'status': HTTPStatus.OK}
             ),
         ]
     )
@@ -70,7 +71,7 @@ class TestPersons:
             (
                     {'k': 'persons-1-1', 'v': '{"persons":[{"id":"","full_name":"","films":[]}]}'},
                     {'page_number': 1, 'page_size': 1},
-                    {'status': 200, 'length': 1, 'full_name': ''}
+                    {'status': HTTPStatus.OK, 'length': 1, 'full_name': ''}
             )
         ]
     )

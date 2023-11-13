@@ -1,5 +1,6 @@
 import time
 import logging
+from http import HTTPStatus
 from random import choice
 
 import pytest
@@ -27,9 +28,9 @@ class TestGenres:
     @pytest.mark.parametrize(
         '_id, expected_answer',
         [
-            ('biuOIGByo', {'status': 404}),
-            (test_item["id"], {'status': 200}),
-            (f'{test_item["id"]}/popular', {'status': 200}),
+            ('biuOIGByo', {'status': HTTPStatus.NOT_FOUND}),
+            (test_item["id"], {'status': HTTPStatus.OK}),
+            (f'{test_item["id"]}/popular', {'status': HTTPStatus.OK}),
         ]
     )
     async def test_genre(self, make_get_request, _id, expected_answer):
@@ -42,7 +43,7 @@ class TestGenres:
         [
             (  # get all rows
                     {'page_size': 10000},
-                    {'status': 200}
+                    {'status': HTTPStatus.OK}
             ),
         ]
     )
@@ -58,7 +59,7 @@ class TestGenres:
             (
                     {'k': 'genres', 'v': '{"genres":[{"id":"","name":"TESTS"}]}'},
                     {},
-                    {'status': 200, 'length': 1, 'name': 'TESTS'}
+                    {'status': HTTPStatus.OK, 'length': 1, 'name': 'TESTS'}
             )
         ]
     )
