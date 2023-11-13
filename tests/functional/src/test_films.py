@@ -1,9 +1,14 @@
 import time
+import logging
+from random import choice
 
 import pytest
-import logging
+
+from testdata import movies_data
 
 LOGGER = logging.getLogger(__name__)
+
+test_item = choice(movies_data).copy()
 
 
 @pytest.mark.asyncio
@@ -26,7 +31,7 @@ class TestMovies:
                     {'query1': 'TEST', 'page_size1': 30},
                     {'status': 200, 'length': 10}
             ),
-            (  # return a number films
+            (  # return a number of films
                     {'page_size': 3},
                     {'status': 200, 'length': 3}
             ),
@@ -49,7 +54,7 @@ class TestMovies:
         'film_id, expected_answer',
         [
             ('biuOIGByo', {'status': 404}),
-            ('3d825f60-9fff-4dfe-b294-1a45fa1e115d', {'status': 200}),
+            (test_item["id"], {'status': 200}),
         ]
     )
     async def test_valid(self, make_get_request, film_id, expected_answer):

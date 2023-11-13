@@ -1,13 +1,18 @@
 import time
+import logging
+from random import choice
 
 import pytest
-import logging
+
+from testdata import genres_data
 
 LOGGER = logging.getLogger(__name__)
 
+test_item = choice(genres_data).copy()
+
 
 @pytest.mark.asyncio
-class TestMovies:
+class TestGenres:
     index_name = 'genres'
     endpoint = '/api/v1/genres/'
 
@@ -23,8 +28,8 @@ class TestMovies:
         '_id, expected_answer',
         [
             ('biuOIGByo', {'status': 404}),
-            ('f24fd632-b1a5-4273-a835-0119bd12f829', {'status': 200}),
-            ('14c75141-41b6-4dd7-b359-3839e0c8c0c5/popular', {'status': 200}),
+            (test_item["id"], {'status': 200}),
+            (f'{test_item["id"]}/popular', {'status': 200}),
         ]
     )
     async def test_genre(self, make_get_request, _id, expected_answer):

@@ -1,13 +1,18 @@
 import time
+import logging
+from random import choice
 
 import pytest
-import logging
+
+from testdata import persons_data
 
 LOGGER = logging.getLogger(__name__)
 
+test_item = choice(persons_data).copy()
+
 
 @pytest.mark.asyncio
-class TestMovies:
+class TestPersons:
     index_name = 'persons'
     endpoint = '/api/v1/persons/'
 
@@ -23,8 +28,8 @@ class TestMovies:
         '_id, expected_answer',
         [
             ('biuOIGByo', {'status': 404}),
-            ('14c75141-41b6-4dd7-b359-3839e0c8c0c5', {'status': 200}),
-            ('14c75141-41b6-4dd7-b359-3839e0c8c0c5/film', {'status': 200}),
+            (test_item["id"], {'status': 200}),
+            (f'{test_item["id"]}/film', {'status': 200}),
         ]
     )
     async def test_person(self, make_get_request, _id, expected_answer):
