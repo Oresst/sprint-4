@@ -2,7 +2,6 @@ import time
 import logging
 from random import choice
 
-
 import pytest
 from http import HTTPStatus
 
