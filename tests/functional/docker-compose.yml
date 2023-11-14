@@ -24,6 +24,8 @@ services:
       file: ../../common.yaml
       service: async_api
 #    image: async_api-image
+    env_file:
+      - env/container.env
     depends_on:
       - es_service
       - redis_service

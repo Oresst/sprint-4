@@ -1,9 +1,9 @@
-from testdata.genres_data import genres_data
-from testdata.genres_index import genres_index_attributes
-from testdata.movies_data import movies_data
-from testdata.movies_index import movies_index_attributes
-from testdata.persons_data import persons_data
-from testdata.persons_index import persons_index_attributes
+from .genres_data import genres_data
+from .genres_index import genres_index_attributes
+from .movies_data import movies_data
+from .movies_index import movies_index_attributes
+from .persons_data import persons_data
+from .persons_index import persons_index_attributes
 
 index_data_map = {
     'movies': movies_data,

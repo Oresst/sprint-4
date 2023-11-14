@@ -42,7 +42,7 @@ class GenresService:
 
 @lru_cache
 def get_genres_service(
-    es: AbstractDbGenresRepository = Depends(get_genres_elastic_repo),
-    redis: AbstractCacheGenreRepository = Depends(get_genre_redis_repo),
+    db: AbstractDbGenresRepository = Depends(get_genres_elastic_repo),
+    cache: AbstractCacheGenreRepository = Depends(get_genre_redis_repo),
 ) -> GenresService:
-    return GenresService(es, redis)
+    return GenresService(db, cache)

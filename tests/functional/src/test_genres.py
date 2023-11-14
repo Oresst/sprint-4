@@ -1,13 +1,19 @@
 import time
+import logging
+from http import HTTPStatus
+from random import choice
 
 import pytest
-import logging
+
+from testdata import genres_data
 
 LOGGER = logging.getLogger(__name__)
 
+test_item = choice(genres_data).copy()
+
 
 @pytest.mark.asyncio
-class TestMovies:
+class TestGenres:
     index_name = 'genres'
     endpoint = '/api/v1/genres/'
 
@@ -22,9 +28,9 @@ class TestMovies:
     @pytest.mark.parametrize(
         '_id, expected_answer',
         [
-            ('biuOIGByo', {'status': 404}),
-            ('f24fd632-b1a5-4273-a835-0119bd12f829', {'status': 200}),
-            ('14c75141-41b6-4dd7-b359-3839e0c8c0c5/popular', {'status': 200}),
+            ('biuOIGByo', {'status': HTTPStatus.NOT_FOUND}),
+            (test_item["id"], {'status': HTTPStatus.OK}),
+            (f'{test_item["id"]}/popular', {'status': HTTPStatus.OK}),
         ]
     )
     async def test_genre(self, make_get_request, _id, expected_answer):
@@ -37,15 +43,16 @@ class TestMovies:
         [
             (  # get all rows
                     {'page_size': 10000},
-                    {'status': 200}
+                    {'status': HTTPStatus.OK}
+
             ),
         ]
     )
     async def test_search(self, make_get_request, query_data, expected_answer):
         response, body = await make_get_request(self.endpoint, query_data)
-        assert response.status == expected_answer['status']
         if 'length' in expected_answer:
             assert len(body) == expected_answer['length']
+        assert response.status == expected_answer['status']
 
     @pytest.mark.parametrize(
         'cache_data, query_data, expected_answer',
@@ -53,7 +60,7 @@ class TestMovies:
             (
                     {'k': 'genres', 'v': '{"genres":[{"id":"","name":"TESTS"}]}'},
                     {},
-                    {'status': 200, 'length': 1, 'name': 'TESTS'}
+                    {'status': HTTPStatus.OK, 'length': 1, 'name': 'TESTS'}
             )
         ]
     )
@@ -63,7 +70,7 @@ class TestMovies:
             cache_data, query_data, expected_answer
     ):
         # 1. Подменяем кэш
-        await redis_client.set(cache_data['k'], cache_data['v'], 300)
+        await redis_client.set(cache_data['k'], cache_data['v'], 3)
         # 3. Запрашиваем данные по API
         response, body = await make_get_request(self.endpoint, query_data)
         # 4. Проверяем ответ

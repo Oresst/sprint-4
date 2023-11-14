@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     )
 
 
+WAIT_GEN_KWARGS = {
+    'base': 2,
+    'factor': 0.1,
+    'max_value': 10
+}
+
 # Корень проекта
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 test_settings = Settings()

@@ -1,7 +1,6 @@
 import asyncio
 import logging
 
-from redis.asyncio import Redis
 import pytest
 import aiohttp
 from yarl import URL
@@ -12,6 +11,12 @@ from settings import test_settings
 from testdata import index_data_map, index_attributes_map
 from utils.helpers import es_generate_actions
 
+pytest_plugins = (
+    "fixtures.redis_fixtures",
+    "fixtures.es_fixtures",
+    'fixtures.aiohttp_fixtures',
+)
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -21,54 +26,6 @@ def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     yield loop
     loop.close()
-
-
-@pytest.fixture(scope='session')
-async def redis_client():
-    client = Redis(host=test_settings.redis_host, port=test_settings.redis_port)
-    LOGGER.info('Redis client open')
-    yield client
-    await client.aclose()
-    LOGGER.info('Redis client closed')
-
-
-@pytest.fixture(scope='session')
-def redis_reset(redis_client: Redis):
-    def inner():
-        redis_client.flushdb()
-        LOGGER.info('Redis cache cleared')
-
-    return inner
-
-
-@pytest.fixture(scope='session')
-async def es_client():
-    client = AsyncElasticsearch(hosts=test_settings.es_url, verify_certs=False)
-    LOGGER.info('ES client open')
-    yield client
-    await client.close()
-    LOGGER.info('ES client closed')
-
-
-@pytest.fixture(scope="class")
-def es_index_create(es_client: AsyncElasticsearch):
-    async def inner(index_name: str):
-        if not await es_client.indices.exists(index=index_name):
-            index_attributes = index_attributes_map[index_name]
-            LOGGER.info(f'ES index "{index_name}" created')
-            await es_client.indices.create(index=index_name, **index_attributes)
-
-    return inner
-
-
-@pytest.fixture(scope="class")
-def es_index_remove(es_client: AsyncElasticsearch):
-    async def inner(index_name: str):
-        if await es_client.indices.exists(index=index_name):
-            await es_client.indices.delete(index=index_name)
-            LOGGER.info(f'ES index "{index_name}" deleted')
-
-    return inner
 
 
 @pytest.fixture(scope="class")
@@ -83,7 +40,7 @@ def clear_db_data(es_index_remove, redis_reset):
 @pytest.fixture(scope="class")
 def es_write_data(es_client: AsyncElasticsearch, es_index_create):
     async def inner(index_name: str):
-        await es_index_create(index_name)
+        await es_index_create(index_name, index_attributes_map[index_name])
         data = index_data_map[index_name]
         bulk_data = es_generate_actions(index_name, data)
         success, errors = await async_bulk(es_client, bulk_data)
@@ -94,13 +51,6 @@ def es_write_data(es_client: AsyncElasticsearch, es_index_create):
         return success, errors
 
     return inner
-
-
-@pytest.fixture(scope='session')
-async def aiohttp_session():
-    session = aiohttp.ClientSession()
-    yield session
-    await session.close()
 
 
 @pytest.fixture

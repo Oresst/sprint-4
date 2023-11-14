@@ -1,5 +1,6 @@
+from fastapi import HTTPException
 from elasticsearch import AsyncElasticsearch
-from elasticsearch.exceptions import NotFoundError
+from elasticsearch.exceptions import NotFoundError, BadRequestError
 
 from repositories.films import AbstractDbFilmRepository
 from models.films import DetailedFilm
@@ -15,6 +16,9 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
             doc = await self._elastic.get(index="movies", id=film_id)
         except NotFoundError:
             return None
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
+
         return DetailedFilm(**doc["_source"])
 
     async def get_film_genres(self, film_id: str) -> list[str] | None:
@@ -22,15 +26,18 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
             doc = await self._elastic.get(index="movies", id=film_id)
         except NotFoundError:
             return None
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
+
         return doc["_source"]["genre"]
 
     async def get_films(
-        self,
-        page_number: int = 1,
-        page_size: int = 10,
-        sort: str | None = None,
-        query: str | None = None,
-        genre: str | None = None,
+            self,
+            page_number: int = 1,
+            page_size: int = 10,
+            sort: str | None = None,
+            query: str | None = None,
+            genre: str | None = None,
     ) -> list[BaseFilm]:
 
         sort_dict = {}
@@ -51,6 +58,8 @@ class FilmsElasticRepository(AbstractDbFilmRepository):
             )
         except NotFoundError:
             return []
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
 
         films = []
 

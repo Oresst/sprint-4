@@ -10,9 +10,9 @@ from repositories.persons import AbstractDbPersonRepository, AbstractCachePerson
 
 
 class PersonsService:
-    def __init__(self, redis_repo: AbstractCachePersonRepository, elastic_repo: AbstractDbPersonRepository):
-        self._cache = redis_repo
-        self._db = elastic_repo
+    def __init__(self, cache: AbstractCachePersonRepository, db: AbstractDbPersonRepository):
+        self._cache = cache
+        self._db = db
 
     async def get_person_by_id(self, person_id: str) -> DetailedPerson | None:
         person = await self._cache.get_person_by_id(person_id)
@@ -62,7 +62,7 @@ class PersonsService:
 
 @lru_cache()
 def get_persons_service(
-        redis_repo: AbstractCachePersonRepository = Depends(get_persons_redis_repo),
-        es_repo: AbstractDbPersonRepository = Depends(get_persons_elastic_repo),
+        cache: AbstractCachePersonRepository = Depends(get_persons_redis_repo),
+        db: AbstractDbPersonRepository = Depends(get_persons_elastic_repo),
 ) -> PersonsService:
-    return PersonsService(redis_repo, es_repo)
+    return PersonsService(cache, db)

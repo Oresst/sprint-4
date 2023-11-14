@@ -1,13 +1,19 @@
 import time
+import logging
+from http import HTTPStatus
+from random import choice
 
 import pytest
-import logging
+
+from testdata import persons_data
 
 LOGGER = logging.getLogger(__name__)
 
+test_item = choice(persons_data).copy()
+
 
 @pytest.mark.asyncio
-class TestMovies:
+class TestPersons:
     index_name = 'persons'
     endpoint = '/api/v1/persons/'
 
@@ -22,9 +28,9 @@ class TestMovies:
     @pytest.mark.parametrize(
         '_id, expected_answer',
         [
-            ('biuOIGByo', {'status': 404}),
-            ('14c75141-41b6-4dd7-b359-3839e0c8c0c5', {'status': 200}),
-            ('14c75141-41b6-4dd7-b359-3839e0c8c0c5/film', {'status': 200}),
+            ('biuOIGByo', {'status': HTTPStatus.NOT_FOUND}),
+            (test_item["id"], {'status': HTTPStatus.OK}),
+            (f'{test_item["id"]}/film', {'status': HTTPStatus.OK}),
         ]
     )
     async def test_person(self, make_get_request, _id, expected_answer):
@@ -37,27 +43,35 @@ class TestMovies:
         [
             (
                     {'query1': 'TEST', 'page_size1': 30},
-                    {'status': 200, 'length': 10}
+                    {'status': HTTPStatus.OK, 'length': 10}
             ),
             (  # return a number of rows
                     {'page_size': 3},
-                    {'status': 200, 'length': 3}
+                    {'status': HTTPStatus.OK, 'length': 3}
             ),
             (  # search by a phrase
                     {'query': 'Victoria Negri', 'page_size': 1},
-                    {'status': 200, 'length': 1}
+                    {'status': HTTPStatus.OK, 'length': 1}
             ),
             (  # get all rows
                     {'page_size': 10000},
-                    {'status': 200}
+                    {'status': HTTPStatus.OK}
+            ),
+            (  # wrong page_size
+                    {'page_size': -1},
+                    {'status': HTTPStatus.BAD_REQUEST}
+            ),
+            (  # wrong page_number
+                    {'page_number': -1},
+                    {'status': HTTPStatus.BAD_REQUEST}
             ),
         ]
     )
     async def test_search(self, make_get_request, query_data, expected_answer):
         response, body = await make_get_request(self.endpoint, query_data)
-        assert response.status == expected_answer['status']
         if 'length' in expected_answer:
             assert len(body) == expected_answer['length']
+        assert response.status == expected_answer['status']
 
     @pytest.mark.parametrize(
         'cache_data, query_data, expected_answer',
@@ -65,7 +79,7 @@ class TestMovies:
             (
                     {'k': 'persons-1-1', 'v': '{"persons":[{"id":"","full_name":"","films":[]}]}'},
                     {'page_number': 1, 'page_size': 1},
-                    {'status': 200, 'length': 1, 'full_name': ''}
+                    {'status': HTTPStatus.OK, 'length': 1, 'full_name': ''}
             )
         ]
     )
@@ -75,7 +89,7 @@ class TestMovies:
             cache_data, query_data, expected_answer
     ):
         # 1. Подменяем кэш
-        await redis_client.set(cache_data['k'], cache_data['v'], 300)
+        await redis_client.set(cache_data['k'], cache_data['v'], 3)
         # 3. Запрашиваем данные по API
         response, body = await make_get_request(self.endpoint, query_data)
         # 4. Проверяем ответ

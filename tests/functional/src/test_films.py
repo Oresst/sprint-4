@@ -1,9 +1,15 @@
 import time
+import logging
+from random import choice
 
 import pytest
-import logging
+from http import HTTPStatus
+
+from testdata import movies_data
 
 LOGGER = logging.getLogger(__name__)
+
+test_item = choice(movies_data).copy()
 
 
 @pytest.mark.asyncio
@@ -24,32 +30,41 @@ class TestMovies:
         [
             (
                     {'query1': 'TEST', 'page_size1': 30},
-                    {'status': 200, 'length': 10}
+                    {'status': HTTPStatus.OK, 'length': 10}
             ),
-            (  # return a number films
+            (  # return a number of films
                     {'page_size': 3},
-                    {'status': 200, 'length': 3}
+                    {'status': HTTPStatus.OK, 'length': 3}
             ),
             (  # search by a phrase
                     {'query': 'Star', 'page_size': 1},
-                    {'status': 200, 'length': 1}
+                    {'status': HTTPStatus.OK, 'length': 1}
             ),
             (  # get all films
                     {'page_size': 60},
-                    {'status': 200, 'length': 60}
+                    {'status': HTTPStatus.OK, 'length': 60}
+            ),
+            (  # wrong page_size
+                    {'page_size': -1},
+                    {'status': HTTPStatus.BAD_REQUEST}
+            ),
+            (  # wrong page_number
+                    {'page_number': -1},
+                    {'status': HTTPStatus.BAD_REQUEST}
             ),
         ]
     )
     async def test_search(self, make_get_request, query_data, expected_answer):
         response, body = await make_get_request(self.endpoint, query_data)
+        if 'length' in expected_answer:
+            assert len(body) == expected_answer['length']
         assert response.status == expected_answer['status']
-        assert len(body) == expected_answer['length']
 
     @pytest.mark.parametrize(
         'film_id, expected_answer',
         [
-            ('biuOIGByo', {'status': 404}),
-            ('3d825f60-9fff-4dfe-b294-1a45fa1e115d', {'status': 200}),
+            ('biuOIGByo', {'status': HTTPStatus.NOT_FOUND}),
+            (test_item["id"], {'status': HTTPStatus.OK}),
         ]
     )
     async def test_valid(self, make_get_request, film_id, expected_answer):
@@ -63,7 +78,7 @@ class TestMovies:
             (
                     {'k': 'films-1-1', 'v': '{"films":[{"id":"","title":"","imdb_rating":-10}]}'},
                     {'page_number': 1, 'page_size': 1},
-                    {'status': 200, 'length': 1, 'imdb_rating': -10}
+                    {'status': HTTPStatus.OK, 'length': 1, 'imdb_rating': -10}
             )
         ]
     )
@@ -73,7 +88,7 @@ class TestMovies:
             cache_data, query_data, expected_answer
     ):
         # 1. Подменяем кэш
-        await redis_client.set(cache_data['k'], cache_data['v'], 300)
+        await redis_client.set(cache_data['k'], cache_data['v'], 3)
         # 3. Запрашиваем данные по API
         response, body = await make_get_request(self.endpoint, query_data)
         # 4. Проверяем ответ
