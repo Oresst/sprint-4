@@ -44,12 +44,21 @@ class TestMovies:
                     {'page_size': 60},
                     {'status': HTTPStatus.OK, 'length': 60}
             ),
+            (  # wrong page_size
+                    {'page_size': -1},
+                    {'status': HTTPStatus.BAD_REQUEST}
+            ),
+            (  # wrong page_number
+                    {'page_number': -1},
+                    {'status': HTTPStatus.BAD_REQUEST}
+            ),
         ]
     )
     async def test_search(self, make_get_request, query_data, expected_answer):
         response, body = await make_get_request(self.endpoint, query_data)
+        if 'length' in expected_answer:
+            assert len(body) == expected_answer['length']
         assert response.status == expected_answer['status']
-        assert len(body) == expected_answer['length']
 
     @pytest.mark.parametrize(
         'film_id, expected_answer',
@@ -79,7 +88,7 @@ class TestMovies:
             cache_data, query_data, expected_answer
     ):
         # 1. Подменяем кэш
-        await redis_client.set(cache_data['k'], cache_data['v'], 300)
+        await redis_client.set(cache_data['k'], cache_data['v'], 3)
         # 3. Запрашиваем данные по API
         response, body = await make_get_request(self.endpoint, query_data)
         # 4. Проверяем ответ

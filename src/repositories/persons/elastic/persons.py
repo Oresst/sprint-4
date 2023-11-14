@@ -1,6 +1,6 @@
+from fastapi import HTTPException
 from elasticsearch import AsyncElasticsearch
-from elasticsearch.exceptions import NotFoundError
-
+from elasticsearch.exceptions import NotFoundError, BadRequestError
 
 from repositories.persons import AbstractDbPersonRepository
 from models.persons import DetailedPerson
@@ -16,10 +16,13 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
             doc = await self._elastic.get(index="persons", id=person_id)
         except NotFoundError:
             return None
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
+
         return DetailedPerson(**doc["_source"])
 
     async def get_persons(
-        self, page_number: int, page_size: int, sort: str | None = None, query: str | None = None
+            self, page_number: int, page_size: int, sort: str | None = None, query: str | None = None
     ) -> list[DetailedPerson]:
         sort_dict = {}
         query_dict = {"bool": {"filter": []}}
@@ -36,6 +39,8 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
             )
         except NotFoundError:
             return []
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
 
         persons = []
 
@@ -49,5 +54,7 @@ class PersonsElasticRepository(AbstractDbPersonRepository):
             doc = await self._elastic.get(index="persons", id=person_id)
         except NotFoundError:
             return ListBaseFilm(films=[])
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
 
         return ListBaseFilm(**doc["_source"])

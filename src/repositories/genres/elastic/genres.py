@@ -1,5 +1,6 @@
+from fastapi import HTTPException
 from elasticsearch import AsyncElasticsearch
-from elasticsearch.exceptions import NotFoundError
+from elasticsearch.exceptions import NotFoundError, BadRequestError
 
 from repositories.genres import AbstractDbGenresRepository
 from models.genres import Genre
@@ -14,6 +15,9 @@ class GenresElasticRepository(AbstractDbGenresRepository):
             doc = await self._elastic.get(index="genres", id=genre_id)
         except NotFoundError:
             return None
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
+
         return Genre(**doc["_source"])
 
     async def get_genres(self) -> list[Genre]:
@@ -21,6 +25,8 @@ class GenresElasticRepository(AbstractDbGenresRepository):
             doc = await self._elastic.search(index="genres", size=1000)
         except NotFoundError:
             return []
+        except BadRequestError:
+            raise HTTPException(status_code=400, detail="Bad request")
 
         genres = []
 
